@@ -57,6 +57,81 @@ test04AccountsWithTransferenceHaveTheCorrectAccountsSummarys
 	self assert: franAccountSummary includes: 'Entrada por transferencia de 50 pesos'.
 	self assert: franAccountSummary includes: 'Balance = 50 pesos'.! !
 
+!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'ff 7/12/2021 01:01:01'!
+test05
+	|portfolio accountSummary|
+	portfolio _ Portfolio new.
+	accountSummary _ portfolio accountSummary.
+	
+	self assert: 1 equals: accountSummary size.
+	self assert: accountSummary includes: 'Balance = 0 pesos'.! !
+
+!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'ff 7/12/2021 01:03:53'!
+test06
+	|fedeAccount accountSummary portfolio|
+	fedeAccount _ ReceptiveAccount new.
+	portfolio _ Portfolio new.
+	Deposit register: 100 * peso on: fedeAccount.
+	portfolio add: fedeAccount.
+	accountSummary _ portfolio accountSummary.
+	
+	self assert: 2 equals: accountSummary size.
+	self assert: accountSummary includes: 'Balance = 100 pesos'.
+	self assert: accountSummary includes: 'Deposito por 100 pesos'.! !
+
+!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'ff 7/12/2021 01:06:14'!
+test07
+	|fedeAccount accountSummary portfolio |
+	fedeAccount _ ReceptiveAccount new.
+	portfolio _ Portfolio new.
+	Deposit register: 100 * peso on: fedeAccount.
+	Withdraw register: 50 * peso on: fedeAccount.
+	portfolio add: fedeAccount.
+	accountSummary _ portfolio accountSummary.
+	
+	self assert: 3 equals: accountSummary size.
+	self assert: accountSummary includes: 'Deposito por 100 pesos'.
+	self assert: accountSummary includes: 'Extraccion por 50 pesos'.
+	self assert: accountSummary includes: 'Balance = 50 pesos'.! !
+
+!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'ff 7/12/2021 01:12:25'!
+test08
+	|fedeAccount franAccount accountSummary portfolio|
+	fedeAccount _ ReceptiveAccount new.
+	franAccount _ ReceptiveAccount new.
+	portfolio _ Portfolio new.
+	Deposit register: 100 * peso on: fedeAccount.
+	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
+	portfolio add: fedeAccount.
+	portfolio add: franAccount.
+	accountSummary _ portfolio accountSummary.
+	
+	self assert: 4 equals: accountSummary size.
+	self assert: accountSummary includes: 'Deposito por 100 pesos'.
+	self assert: accountSummary includes: 'Salida por transferencia de 50 pesos'.
+	self assert: accountSummary includes: 'Entrada por transferencia de 50 pesos'.
+	self assert: accountSummary includes: 'Balance = 100 pesos'.! !
+
+!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'ff 7/12/2021 01:12:06'!
+test09
+	|fedeAccount franAccount accountSummary portfolio portfolio2|
+	fedeAccount _ ReceptiveAccount new.
+	franAccount _ ReceptiveAccount new.
+	portfolio _ Portfolio new.
+	portfolio2 _ Portfolio new.
+	Deposit register: 100 * peso on: fedeAccount.
+	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
+	portfolio add: fedeAccount.
+	portfolio add: franAccount.
+	portfolio2 add: portfolio .
+	accountSummary _ portfolio2 accountSummary.
+	
+	self assert: 4 equals: accountSummary size.
+	self assert: accountSummary includes: 'Deposito por 100 pesos'.
+	self assert: accountSummary includes: 'Salida por transferencia de 50 pesos'.
+	self assert: accountSummary includes: 'Entrada por transferencia de 50 pesos'.
+	self assert: accountSummary includes: 'Balance = 100 pesos'.! !
+
 
 !classDefinition: #PortfolioTest category: 'ServiciosFinancieros-2'!
 TestCase subclass: #PortfolioTest
@@ -370,6 +445,10 @@ Object subclass: #Account
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
+!Account methodsFor: 'main protocol' stamp: 'ff 7/12/2021 00:18:43'!
+accountSummary
+	self subclassResponsibility.! !
+
 !Account methodsFor: 'main protocol' stamp: 'HAW 5/25/2019 12:23:40'!
 balance
 
@@ -405,10 +484,18 @@ initialize
 	accounts := OrderedCollection new.! !
 
 
-!Portfolio methodsFor: 'main protocol' stamp: 'HAW 5/25/2019 11:19:36'!
+!Portfolio methodsFor: 'main protocol' stamp: 'ff 7/12/2021 00:58:15'!
+accountSummary
+	|accountSummary|
+	accountSummary _ OrderedCollection new.
+	accounts do: [:anAccount | anAccount addAccountSummaryTo: accountSummary ].
+	accountSummary add: ('Balance = ', (self balance) asString).
+	^ accountSummary.! !
+
+!Portfolio methodsFor: 'main protocol' stamp: 'ff 7/12/2021 01:01:58'!
 balance
 	
-	^accounts sum: [ :anAccount | anAccount balance ] ifEmpty: [ 0 ]! !
+	^accounts sum: [ :anAccount | anAccount balance ] ifEmpty: [ 0 * peso]! !
 
 !Portfolio methodsFor: 'main protocol' stamp: 'HAW 5/25/2019 11:28:29'!
 hasRegistered: aTransaction
@@ -432,6 +519,12 @@ add: accountToAdd
 	accounts add: accountToAdd.
 	! !
 
+
+!Portfolio methodsFor: 'private' stamp: 'ff 7/12/2021 01:11:44'!
+addAccountSummaryTo: aCollectionOfAccountSummary
+
+	accounts do: [ :anAccount | anAccount addAccountSummaryTo: aCollectionOfAccountSummary ]
+	! !
 
 !Portfolio methodsFor: 'private' stamp: 'HAW 5/25/2019 11:42:55'!
 addTransactionsTo: aCollectionOfTransactions
@@ -474,6 +567,14 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
+!ReceptiveAccount methodsFor: 'main protocol' stamp: 'ff 7/12/2021 01:00:12'!
+accountSummary
+	|accountSummary|
+	accountSummary _ OrderedCollection new.
+	self callculateAccountSummary: accountSummary.
+	accountSummary add: ('Balance = ', (self balance) asString).
+	^ accountSummary.! !
+
 !ReceptiveAccount methodsFor: 'main protocol' stamp: 'fran 7/9/2021 22:57:13'!
 balance
 
@@ -499,24 +600,25 @@ transactions
 	^ transactions copy! !
 
 
+!ReceptiveAccount methodsFor: 'private' stamp: 'ff 7/12/2021 01:05:18'!
+addAccountSummaryTo: aCollectionOfAccountSummary
+
+	self callculateAccountSummary: aCollectionOfAccountSummary.! !
+
 !ReceptiveAccount methodsFor: 'private' stamp: 'HAW 5/25/2019 11:38:52'!
 addTransactionsTo: aCollectionOfTransactions
 
 	aCollectionOfTransactions addAll: transactions ! !
 
-
-!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'fran 7/9/2021 23:09:09'!
-accountSummary
-	|accountSummary|
-	accountSummary _ OrderedCollection new.
+!ReceptiveAccount methodsFor: 'private' stamp: 'ff 7/12/2021 00:59:50'!
+callculateAccountSummary: anOrderedCollection
 	transactions do: [:aTransaction |
-		(aTransaction isKindOf: Deposit) ifTrue: [accountSummary add: 'Deposito por ', (aTransaction value) asString].
-		(aTransaction isKindOf: Withdraw) ifTrue: [accountSummary add: 'Extraccion por ', (aTransaction value) asString].
-		(aTransaction isKindOf: TransferDepositLeg) ifTrue: [accountSummary add: 'Entrada por transferencia de ', (aTransaction value) asString].
-		(aTransaction isKindOf: TransferWithdrawLeg ) ifTrue: [accountSummary add: 'Salida por transferencia de ', (aTransaction value) asString].
+		(aTransaction isKindOf: Deposit) ifTrue: [anOrderedCollection add: 'Deposito por ', (aTransaction value) asString].
+		(aTransaction isKindOf: Withdraw) ifTrue: [anOrderedCollection add: 'Extraccion por ', (aTransaction value) asString].
+		(aTransaction isKindOf: TransferDepositLeg) ifTrue: [anOrderedCollection add: 'Entrada por transferencia de ', (aTransaction value) asString].
+		(aTransaction isKindOf: TransferWithdrawLeg ) ifTrue: [anOrderedCollection add: 'Salida por transferencia de ', (aTransaction value) asString].
 		].
-	accountSummary add: ('Balance = ', (self balance) asString).
-	^ accountSummary.! !
+	! !
 
 
 !classDefinition: #AccountTransaction category: 'ServiciosFinancieros-2'!
