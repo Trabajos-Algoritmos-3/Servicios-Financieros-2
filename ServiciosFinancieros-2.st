@@ -351,16 +351,17 @@ TestCase subclass: #TransferNetTest
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:00:14'!
+!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:21:22'!
 test01TransferNetHasBalanceOfZeroInAccountWithoutTransactions
 	|fedeAccount transferNet xxx|
 	fedeAccount _ ReceptiveAccount new.
+	Deposit register: 100 * peso on: fedeAccount.
 	transferNet _ TransferNet of: fedeAccount.
 	xxx _ transferNet getTransferNet.
 	
 	self assert: xxx equals: 0 * peso.! !
 
-!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:34:19'!
+!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:37:50'!
 test02AccountWithTransferenceHasTheCorrectTransferNet
 	|fedeAccount franAccount transferNetOfFede transferNetOfFran xxx yyy |
 	fedeAccount _ ReceptiveAccount new.
@@ -371,9 +372,34 @@ test02AccountWithTransferenceHasTheCorrectTransferNet
 	transferNetOfFede _ TransferNet of: fedeAccount.
 	xxx _ transferNetOfFran getTransferNet.
 	yyy _ transferNetOfFede getTransferNet.
-	
+
 	self assert: xxx equals: 50 * peso.
 	self assert: yyy equals: -50 * peso.! !
+
+!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:40:54'!
+test03TransferHasBalanceOfZeroInPortfolioWithoutTransactions
+	"NO HECHO CON TDD"
+	|portfolio transferNetOfPortfolio transferNet|
+	portfolio _ Portfolio new.
+	transferNetOfPortfolio _ TransferNet of: portfolio.
+	transferNet _ transferNetOfPortfolio getTransferNet.
+	
+	self assert: transferNet equals: 0 * peso.! !
+
+!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:40:48'!
+test04PortfolioWithTransferenceHasTheCorrectTransferNet
+	"NO HECHO CON TDD"
+	|fedeAccount franAccount portfolio transferNetOfPortfolio transferNet |
+	fedeAccount _ ReceptiveAccount new.
+	franAccount _ ReceptiveAccount new.
+	portfolio _ Portfolio new.
+	portfolio add: fedeAccount.
+	Deposit register: 100 * peso on: fedeAccount.
+	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
+	transferNetOfPortfolio _ TransferNet of: portfolio.
+	transferNet _ transferNetOfPortfolio getTransferNet.
+
+	self assert: transferNet equals: -50 * peso.! !
 
 
 !classDefinition: #TransferTest category: 'ServiciosFinancieros-2'!
@@ -741,6 +767,11 @@ affectBalance: aBalance
 
 	^aBalance + value ! !
 
+
+!Deposit methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:46:05'!
+xxx: aTransferNet
+	aTransferNet depositTransferNetValue: self value.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Deposit class' category: 'ServiciosFinancieros-2'!
@@ -816,6 +847,11 @@ affectBalance: aBalance
 
 	^aBalance + self value! !
 
+
+!TransferDepositLeg methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:46:48'!
+xxx: aTransferNet
+	aTransferNet transferDepositLegTransferNetValue: self value.! !
+
 
 !classDefinition: #TransferWithdrawLeg category: 'ServiciosFinancieros-2'!
 TransferLeg subclass: #TransferWithdrawLeg
@@ -839,6 +875,11 @@ for: aSummary
 affectBalance: aBalance
 
 	^aBalance - self value! !
+
+
+!TransferWithdrawLeg methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:47:04'!
+xxx: aTransferNet
+	aTransferNet transferWithdrawLegTransferNetValue: self value.! !
 
 
 !classDefinition: #Withdraw category: 'ServiciosFinancieros-2'!
@@ -869,6 +910,11 @@ for: aSummary
 affectBalance: aBalance
 
 	^aBalance - value! !
+
+
+!Withdraw methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:46:25'!
+xxx: aTransferNet
+	aTransferNet withdrawTransferNetValue: self value.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -977,25 +1023,41 @@ amount: anAmountOfMoney from: originAccount to: destinationAccount
 
 !classDefinition: #TransferNet category: 'ServiciosFinancieros-2'!
 Object subclass: #TransferNet
-	instanceVariableNames: 'account'
+	instanceVariableNames: 'account _total'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:28:07'!
+!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:51:49'!
 callculateTransferNet
-	^(account transactions)
-		inject: 0 * peso
-		into: [:currentBalance :aTransaction | (aTransaction isKindOf: TransferLeg) ifTrue: [aTransaction affectBalance: currentBalance]].
-	! !
+	(account transactions) do: [:aTransaction | aTransaction xxx: self].! !
 
-!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:24:11'!
+!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:48:33'!
 getTransferNet
-	^ self callculateTransferNet.! !
+	self callculateTransferNet.
+	^ _total.! !
 
-!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:02:07'!
+!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:47:43'!
 initializeWith: anAccount
-	account _ anAccount.! !
+	account _ anAccount.
+	_total _ 0 * peso.! !
+
+
+!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:49:24'!
+depositTransferNetValue: aDepositValue
+	_total _ _total + 0.! !
+
+!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:51:03'!
+transferDepositLegTransferNetValue: aTransferDepositValue
+	_total _ _total + aTransferDepositValue.! !
+
+!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:51:21'!
+transferWithdrawLegTransferNetValue: aTransferDepositValue
+	_total _ _total - aTransferDepositValue.! !
+
+!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:49:51'!
+withdrawTransferNetValue: aWithdrawValue
+	_total _ _total + 0.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
