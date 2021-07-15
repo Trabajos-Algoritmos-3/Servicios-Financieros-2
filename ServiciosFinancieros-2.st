@@ -5,7 +5,7 @@ TestCase subclass: #AccountSummaryTest
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!AccountSummaryTest methodsFor: 'testing' stamp: 'fran 7/12/2021 20:21:05'!
+!AccountSummaryTest methodsFor: 'testing' stamp: 'ff 7/15/2021 16:20:01'!
 test01AccountSummaryHasBalanceOfZeroInAccountWithoutTransactions
 	|fedeAccount accountSummary summary|
 	fedeAccount _ ReceptiveAccount new.
@@ -269,19 +269,18 @@ TestCase subclass: #TransferNetTest
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!TransferNetTest methodsFor: 'testing' stamp: 'fran 7/13/2021 22:21:22'!
+!TransferNetTest methodsFor: 'testing' stamp: 'ff 7/15/2021 16:22:42'!
 test01TransferNetHasBalanceOfZeroInAccountWithoutTransactions
-	|fedeAccount transferNet xxx|
+	|fedeAccount transferNet transferNetValue|
 	fedeAccount _ ReceptiveAccount new.
 	Deposit register: 100 * peso on: fedeAccount.
 	transferNet _ TransferNet of: fedeAccount.
-	xxx _ transferNet getTransferNet.
-	
-	self assert: xxx equals: 0 * peso.! !
+	transferNetValue _ transferNet getTransferNet.
+	self assert: transferNetValue equals: 0 * peso.! !
 
-!TransferNetTest methodsFor: 'testing' stamp: 'fran 7/14/2021 23:24:00'!
+!TransferNetTest methodsFor: 'testing' stamp: 'ff 7/15/2021 16:23:17'!
 test02TransferNetForAccountsWithMultipleTransactions
-	|fedeAccount franAccount transferNetOfFede transferNetOfFran transferNetValueOfFran transferNetValueOfFede |
+	|fedeAccount franAccount transferNetOfFede transferNetOfFran transferNetValueOfFran transferNetValueOfFede|
 	fedeAccount _ ReceptiveAccount new.
 	franAccount _ ReceptiveAccount new.
 	Deposit register: 100 * peso on: fedeAccount.
@@ -291,7 +290,6 @@ test02TransferNetForAccountsWithMultipleTransactions
 	transferNetOfFede _ TransferNet of: fedeAccount.
 	transferNetValueOfFran _ transferNetOfFran getTransferNet.
 	transferNetValueOfFede _ transferNetOfFede getTransferNet.
-
 	self assert: transferNetValueOfFran equals: 50 * peso.
 	self assert: transferNetValueOfFede equals: -50 * peso.! !
 
@@ -546,59 +544,6 @@ addTransactionsTo: aCollectionOfTransactions
 	aCollectionOfTransactions addAll: transactions ! !
 
 
-!classDefinition: #AccountSummary category: 'ServiciosFinancieros-2'!
-Object subclass: #AccountSummary
-	instanceVariableNames: 'account summary'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'ServiciosFinancieros-2'!
-
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:35:45'!
-messageDeposit: aDepositValue
-	summary add: 'Deposito por ', aDepositValue asString.! !
-
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:37:53'!
-messageTransferDepositLeg: aTransferDepositValue
-	summary add: 'Entrada por transferencia de ', aTransferDepositValue asString.! !
-
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:38:28'!
-messageTransferWithdrawLeg: aTransferWithdrawValue
-	summary add: 'Salida por transferencia de ', aTransferWithdrawValue asString.! !
-
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:38:52'!
-messageWithdraw: aWithdrawValue
-	summary add: 'Extraccion por ', aWithdrawValue asString.! !
-
-
-!AccountSummary methodsFor: 'initialization' stamp: 'fran 7/12/2021 20:43:37'!
-initializeWith: anAccount
-	account _ anAccount.
-	summary _ OrderedCollection new.! !
-
-
-!AccountSummary methodsFor: 'private' stamp: 'fran 7/14/2021 23:14:21'!
-callculateAccountSummary
-	(account transactions) do: [:aTransaction | aTransaction summaryFor: self].
-	! !
-
-
-!AccountSummary methodsFor: 'main protocol' stamp: 'fran 7/14/2021 23:14:06'!
-getSummary
-	self callculateAccountSummary.
-	summary add: ('Balance = ', (account balance) asString).
-	^summary.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'AccountSummary class' category: 'ServiciosFinancieros-2'!
-AccountSummary class
-	instanceVariableNames: ''!
-
-!AccountSummary class methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:17:36'!
-of: anAccount
-	^self new initializeWith: anAccount.! !
-
-
 !classDefinition: #AccountTransaction category: 'ServiciosFinancieros-2'!
 Object subclass: #AccountTransaction
 	instanceVariableNames: ''
@@ -612,20 +557,15 @@ value
 	self subclassResponsibility ! !
 
 
-!AccountTransaction methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:43:45'!
-transferNetFor: aTransferNet
-	self subclassResponsibility.! !
-
-
-!AccountTransaction methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
-summaryFor: aSummary
-	self subclassResponsibility.! !
-
-
 !AccountTransaction methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:39'!
 affectBalance: aBalance
 
 	self subclassResponsibility ! !
+
+
+!AccountTransaction methodsFor: 'visitor' stamp: 'ff 7/15/2021 15:53:06'!
+accept: aReport
+	self subclassResponsibility .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -663,20 +603,15 @@ value
 	^ value! !
 
 
-!Deposit methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
-summaryFor: aSummary
-	aSummary messageDeposit: self value.! !
-
-
 !Deposit methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:02'!
 affectBalance: aBalance
 
 	^aBalance + value ! !
 
 
-!Deposit methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:46:06'!
-transferNetFor: aTransferNet
-	aTransferNet valueForDepositTransferNet: self value.! !
+!Deposit methodsFor: 'visitor' stamp: 'ff 7/15/2021 15:53:41'!
+accept: aReport
+	aReport visitDeposit: self.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -709,14 +644,9 @@ initializeWith: aTransfer
 	transfer := aTransfer! !
 
 
-!TransferLeg methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:43:45'!
-transferNetFor: aTransferNet
-	self subclassResponsibility.! !
-
-
-!TransferLeg methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
-summaryFor: aSummary
-	self subclassResponsibility.! !
+!TransferLeg methodsFor: 'visitor' stamp: 'ff 7/15/2021 15:53:50'!
+accept: aReport
+	self subclassResponsibility .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -748,20 +678,15 @@ withdrawLeg
 	^transfer withdrawLeg! !
 
 
-!TransferDepositLeg methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
-summaryFor: aSummary
-	aSummary messageTransferDepositLeg: self value.! !
-
-
 !TransferDepositLeg methodsFor: 'balance' stamp: 'LL 9/20/2020 22:27:49'!
 affectBalance: aBalance
 
 	^aBalance + self value! !
 
 
-!TransferDepositLeg methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:46:24'!
-transferNetFor: aTransferNet
-	aTransferNet valueForTransferDepositLegTransferNet: self value.! !
+!TransferDepositLeg methodsFor: 'visitor' stamp: 'ff 7/15/2021 15:54:44'!
+accept: aReport
+	aReport visitTransferDepositLeg: self.! !
 
 
 !classDefinition: #TransferWithdrawLeg category: 'ServiciosFinancieros-2'!
@@ -777,20 +702,15 @@ depositLeg
 	^transfer depositLeg! !
 
 
-!TransferWithdrawLeg methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
-summaryFor: aSummary
-	aSummary messageTransferWithdrawLeg: self value.! !
-
-
 !TransferWithdrawLeg methodsFor: 'balance' stamp: 'LL 9/20/2020 22:27:55'!
 affectBalance: aBalance
 
 	^aBalance - self value! !
 
 
-!TransferWithdrawLeg methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:46:50'!
-transferNetFor: aTransferNet
-	aTransferNet valueForTransferWithdrawLegTransferNet: self value.! !
+!TransferWithdrawLeg methodsFor: 'visitor' stamp: 'ff 7/15/2021 15:55:17'!
+accept: aReport
+	aReport visitTransferWithdrawLeg: self.! !
 
 
 !classDefinition: #Withdraw category: 'ServiciosFinancieros-2'!
@@ -812,20 +732,15 @@ value
 	^ value! !
 
 
-!Withdraw methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
-summaryFor: aSummary
-	aSummary messageWithdraw: self value.! !
-
-
 !Withdraw methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:15'!
 affectBalance: aBalance
 
 	^aBalance - value! !
 
 
-!Withdraw methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:47:08'!
-transferNetFor: aTransferNet
-	aTransferNet valueForWithdrawTransferNet: self value.! !
+!Withdraw methodsFor: 'visitor' stamp: 'ff 7/15/2021 15:54:16'!
+accept: aReport
+	aReport visitWithdraw: self.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -837,6 +752,141 @@ Withdraw class
 summaryFor: aValue
 
 	^ self new initializeFor: aValue ! !
+
+
+!classDefinition: #Reports category: 'ServiciosFinancieros-2'!
+Object subclass: #Reports
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ServiciosFinancieros-2'!
+
+!Reports methodsFor: 'visit' stamp: 'ff 7/15/2021 16:29:04'!
+visitDeposit: aDeposit
+	self subclassResponsibility.! !
+
+!Reports methodsFor: 'visit' stamp: 'ff 7/15/2021 16:29:20'!
+visitTransferDepositLeg: aTransferDeposit
+	self subclassResponsibility.! !
+
+!Reports methodsFor: 'visit' stamp: 'ff 7/15/2021 16:30:06'!
+visitTransferWithdrawLeg: aTransferWithdraw
+	self subclassResponsibility.! !
+
+!Reports methodsFor: 'visit' stamp: 'ff 7/15/2021 16:29:43'!
+visitWithdraw: aWithdraw
+	self subclassResponsibility.! !
+
+
+!Reports methodsFor: 'initialization' stamp: 'ff 7/15/2021 16:25:52'!
+initializeWith: anAccount
+	self subclassResponsibility.! !
+
+
+!classDefinition: #AccountSummary category: 'ServiciosFinancieros-2'!
+Reports subclass: #AccountSummary
+	instanceVariableNames: 'account summary'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ServiciosFinancieros-2'!
+
+!AccountSummary methodsFor: 'visit' stamp: 'ff 7/15/2021 15:58:17'!
+visitDeposit: aDeposit
+	summary add: 'Deposito por ', aDeposit value asString.! !
+
+!AccountSummary methodsFor: 'visit' stamp: 'ff 7/15/2021 15:58:30'!
+visitTransferDepositLeg: aTransferDeposit
+	summary add: 'Entrada por transferencia de ', aTransferDeposit value asString.! !
+
+!AccountSummary methodsFor: 'visit' stamp: 'ff 7/15/2021 15:58:37'!
+visitTransferWithdrawLeg: aTransferWithdraw
+	summary add: 'Salida por transferencia de ', aTransferWithdraw value asString.! !
+
+!AccountSummary methodsFor: 'visit' stamp: 'ff 7/15/2021 15:58:46'!
+visitWithdraw: aWithdraw
+	summary add: 'Extraccion por ', aWithdraw value asString.! !
+
+
+!AccountSummary methodsFor: 'initialization' stamp: 'fran 7/12/2021 20:43:37'!
+initializeWith: anAccount
+	account _ anAccount.
+	summary _ OrderedCollection new.! !
+
+
+!AccountSummary methodsFor: 'private' stamp: 'ff 7/15/2021 16:37:30'!
+callculateAccountSummary
+	(account transactions) do: [:aTransaction | aTransaction accept: self].
+	summary add: ('Balance = ', (account balance) asString).
+	! !
+
+
+!AccountSummary methodsFor: 'main protocol' stamp: 'ff 7/15/2021 16:37:25'!
+getSummary
+	summary removeAll .
+	self callculateAccountSummary.
+	^summary.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AccountSummary class' category: 'ServiciosFinancieros-2'!
+AccountSummary class
+	instanceVariableNames: ''!
+
+!AccountSummary class methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:17:36'!
+of: anAccount
+	^self new initializeWith: anAccount.! !
+
+
+!classDefinition: #TransferNet category: 'ServiciosFinancieros-2'!
+Reports subclass: #TransferNet
+	instanceVariableNames: 'account total'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ServiciosFinancieros-2'!
+
+!TransferNet methodsFor: 'initialization' stamp: 'fran 7/14/2021 23:29:28'!
+initializeWith: anAccount
+	account _ anAccount.
+	total _ 0 * peso.! !
+
+
+!TransferNet methodsFor: 'private' stamp: 'ff 7/15/2021 16:02:26'!
+callculateTransferNet
+	(account transactions) do: [:aTransaction | aTransaction accept: self].! !
+
+
+!TransferNet methodsFor: 'main protocol' stamp: 'ff 7/15/2021 16:20:51'!
+getTransferNet
+	total _ 0 * peso.
+	self callculateTransferNet.
+	^ total.! !
+
+
+!TransferNet methodsFor: 'visit' stamp: 'ff 7/15/2021 16:01:47'!
+visitDeposit: aDeposit
+	total _ total + 0.! !
+
+!TransferNet methodsFor: 'visit' stamp: 'ff 7/15/2021 16:01:57'!
+visitTransferDepositLeg: aTransferDeposit
+	total _ total + aTransferDeposit value.! !
+
+!TransferNet methodsFor: 'visit' stamp: 'ff 7/15/2021 16:02:09'!
+visitTransferWithdrawLeg: aTransferDeposit
+	total _ total - aTransferDeposit value.! !
+
+!TransferNet methodsFor: 'visit' stamp: 'ff 7/15/2021 16:02:14'!
+visitWithdraw: aWithdraw
+	total _ total + 0.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TransferNet class' category: 'ServiciosFinancieros-2'!
+TransferNet class
+	instanceVariableNames: ''!
+
+!TransferNet class methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:00:42'!
+of: anAccount
+	^ self new initializeWith: anAccount.! !
 
 
 !classDefinition: #Transfer category: 'ServiciosFinancieros-2'!
@@ -930,54 +980,3 @@ amount: anAmountOfMoney from: originAccount to: destinationAccount
 	
 	
 	! !
-
-
-!classDefinition: #TransferNet category: 'ServiciosFinancieros-2'!
-Object subclass: #TransferNet
-	instanceVariableNames: 'account total'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'ServiciosFinancieros-2'!
-
-!TransferNet methodsFor: 'initialization' stamp: 'fran 7/14/2021 23:29:28'!
-initializeWith: anAccount
-	account _ anAccount.
-	total _ 0 * peso.! !
-
-
-!TransferNet methodsFor: 'private' stamp: 'fran 7/14/2021 22:43:45'!
-callculateTransferNet
-	(account transactions) do: [:aTransaction | aTransaction transferNetFor: self].! !
-
-
-!TransferNet methodsFor: 'main protocol' stamp: 'fran 7/14/2021 23:29:28'!
-getTransferNet
-	self callculateTransferNet.
-	^ total.! !
-
-
-!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
-valueForDepositTransferNet: aDepositValue
-	total _ total + 0.! !
-
-!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
-valueForTransferDepositLegTransferNet: aTransferDepositValue
-	total _ total + aTransferDepositValue.! !
-
-!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
-valueForTransferWithdrawLegTransferNet: aTransferDepositValue
-	total _ total - aTransferDepositValue.! !
-
-!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
-valueForWithdrawTransferNet: aWithdrawValue
-	total _ total + 0.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TransferNet class' category: 'ServiciosFinancieros-2'!
-TransferNet class
-	instanceVariableNames: ''!
-
-!TransferNet class methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 21:00:42'!
-of: anAccount
-	^ self new initializeWith: anAccount.! !
