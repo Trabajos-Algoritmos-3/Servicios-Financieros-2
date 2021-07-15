@@ -5,7 +5,7 @@ TestCase subclass: #AccountSummaryTest
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:21:05'!
+!AccountSummaryTest methodsFor: 'testing' stamp: 'fran 7/12/2021 20:21:05'!
 test01AccountSummaryHasBalanceOfZeroInAccountWithoutTransactions
 	|fedeAccount accountSummary summary|
 	fedeAccount _ ReceptiveAccount new.
@@ -15,8 +15,8 @@ test01AccountSummaryHasBalanceOfZeroInAccountWithoutTransactions
 	self assert: 1 equals: summary size.
 	self assert: summary includes: 'Balance = 0 pesos'.! !
 
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:28:25'!
-test02AccountWithDepositsHasTheCorrectAccountSummary
+!AccountSummaryTest methodsFor: 'testing' stamp: 'fran 7/14/2021 22:27:23'!
+test02AccountSummaryForAccountWithDeposit
 	|fedeAccount accountSummary summary|
 	fedeAccount _ ReceptiveAccount new.
 	Deposit register: 100 * peso on: fedeAccount.
@@ -27,8 +27,8 @@ test02AccountWithDepositsHasTheCorrectAccountSummary
 	self assert: summary includes: 'Balance = 100 pesos'.
 	self assert: summary includes: 'Deposito por 100 pesos'.! !
 
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:29:14'!
-test03AccountWithWithdrawsHasTheCorrectAccountSummary
+!AccountSummaryTest methodsFor: 'testing' stamp: 'fran 7/14/2021 22:27:59'!
+test03AccountSummaryForAccountWithDepositAndWithdraw
 	|fedeAccount accountSummary summary |
 	fedeAccount _ ReceptiveAccount new.
 	Deposit register: 100 * peso on: fedeAccount.
@@ -41,106 +41,24 @@ test03AccountWithWithdrawsHasTheCorrectAccountSummary
 	self assert: summary includes: 'Extraccion por 50 pesos'.
 	self assert: summary includes: 'Balance = 50 pesos'.! !
 
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:30:43'!
-test04AccountsWithTransferenceHaveTheCorrectAccountsSummarys
+!AccountSummaryTest methodsFor: 'testing' stamp: 'fran 7/14/2021 22:30:41'!
+test04AccountsSummarysForAccountsWithTransference
 	|fedeAccount franAccount fedeAccountSummary franAccountSummary summaryOfFede summaryOfFran|
 	fedeAccount _ ReceptiveAccount new.
 	franAccount _ ReceptiveAccount new.
-	Deposit register: 100 * peso on: fedeAccount.
 	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
 	fedeAccountSummary _ AccountSummary of: fedeAccount.
 	franAccountSummary _ AccountSummary of: franAccount.
 	summaryOfFede _ fedeAccountSummary getSummary.
 	summaryOfFran _ franAccountSummary getSummary.
 	
-	self assert: 3 equals: summaryOfFede size.
-	self assert: summaryOfFede includes: 'Deposito por 100 pesos'.
+	self assert: 2 equals: summaryOfFede size.
 	self assert: summaryOfFede includes: 'Salida por transferencia de 50 pesos'.
-	self assert: summaryOfFede includes: 'Balance = 50 pesos'.
+	self assert: summaryOfFede includes: 'Balance = -50 pesos'.
 	
 	self assert: 2 equals: summaryOfFran size.
 	self assert: summaryOfFran includes: 'Entrada por transferencia de 50 pesos'.
 	self assert: summaryOfFran includes: 'Balance = 50 pesos'.! !
-
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:32:39'!
-test05
-	|portfolio accountSummary summary|
-	portfolio _ Portfolio new.
-	accountSummary _ AccountSummary of: portfolio.
-	summary _ accountSummary getSummary.
-	
-	self assert: 1 equals: summary size.
-	self assert: summary includes: 'Balance = 0 pesos'.! !
-
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:33:26'!
-test06
-	|fedeAccount accountSummary portfolio summary |
-	fedeAccount _ ReceptiveAccount new.
-	portfolio _ Portfolio new.
-	Deposit register: 100 * peso on: fedeAccount.
-	portfolio add: fedeAccount.
-	accountSummary _ AccountSummary of: portfolio.
-	summary _ accountSummary getSummary.
-	
-	self assert: 2 equals: summary size.
-	self assert: summary includes: 'Balance = 100 pesos'.
-	self assert: summary includes: 'Deposito por 100 pesos'.! !
-
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:34:10'!
-test07
-	|fedeAccount accountSummary portfolio summary |
-	fedeAccount _ ReceptiveAccount new.
-	portfolio _ Portfolio new.
-	Deposit register: 100 * peso on: fedeAccount.
-	Withdraw register: 50 * peso on: fedeAccount.
-	portfolio add: fedeAccount.
-	accountSummary _ AccountSummary of: portfolio.
-	summary _ accountSummary getSummary.
-	
-	self assert: 3 equals: summary size.
-	self assert: summary includes: 'Deposito por 100 pesos'.
-	self assert: summary includes: 'Extraccion por 50 pesos'.
-	self assert: summary includes: 'Balance = 50 pesos'.! !
-
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:34:32'!
-test08
-	|fedeAccount franAccount accountSummary portfolio summary |
-	fedeAccount _ ReceptiveAccount new.
-	franAccount _ ReceptiveAccount new.
-	portfolio _ Portfolio new.
-	Deposit register: 100 * peso on: fedeAccount.
-	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
-	portfolio add: fedeAccount.
-	portfolio add: franAccount.
-	accountSummary _ AccountSummary of: portfolio.
-	summary _ accountSummary getSummary.
-	
-	self assert: 4 equals: summary size.
-	self assert: summary includes: 'Deposito por 100 pesos'.
-	self assert: summary includes: 'Salida por transferencia de 50 pesos'.
-	self assert: summary includes: 'Entrada por transferencia de 50 pesos'.
-	self assert: summary includes: 'Balance = 100 pesos'.! !
-
-!AccountSummaryTest methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:35:15'!
-test09
-	|fedeAccount franAccount accountSummary portfolio portfolio2 summary |
-	fedeAccount _ ReceptiveAccount new.
-	franAccount _ ReceptiveAccount new.
-	portfolio _ Portfolio new.
-	portfolio2 _ Portfolio new.
-	Deposit register: 100 * peso on: fedeAccount.
-	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
-	portfolio add: fedeAccount.
-	portfolio add: franAccount.
-	portfolio2 add: portfolio .
-	accountSummary _ AccountSummary of: portfolio2.
-	summary _ accountSummary getSummary.
-	
-	self assert: 4 equals: summary size.
-	self assert: summary includes: 'Deposito por 100 pesos'.
-	self assert: summary includes: 'Salida por transferencia de 50 pesos'.
-	self assert: summary includes: 'Entrada por transferencia de 50 pesos'.
-	self assert: summary includes: 'Balance = 100 pesos'.! !
 
 
 !classDefinition: #PortfolioTest category: 'ServiciosFinancieros-2'!
@@ -181,10 +99,10 @@ test03BalanceOfPortfolioIsCalculatedRecursivelyOnPortfolios
 	
 	self assert: (composedPortfolioAccount balance + simplePortfolio balance) equals: composedPortofolio balance! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'LL 7/1/2021 03:27:12'!
+!PortfolioTest methodsFor: 'tests' stamp: 'fran 7/14/2021 22:43:32'!
 test04PortfolioWithoutAccountsHasNoRegisteredTransaction
 
-	self deny: (Portfolio new hasRegistered: (Deposit for: 100 * peso))! !
+	self deny: (Portfolio new hasRegistered: (Deposit summaryFor: 100 * peso))! !
 
 !PortfolioTest methodsFor: 'tests' stamp: 'LL 7/1/2021 03:27:18'!
 test05PortfolioHasRegisteredItsAccountsTransactions
@@ -317,14 +235,14 @@ test05ReceptiveAccountKnowsRegisteredTransactions
 	self assert: (account hasRegistered: withdraw).
 ! !
 
-!ReceptiveAccountTest methodsFor: 'tests' stamp: 'LL 7/1/2021 03:12:14'!
+!ReceptiveAccountTest methodsFor: 'tests' stamp: 'fran 7/14/2021 22:43:32'!
 test06ReceptiveAccountDoNotKnowNotRegisteredTransactions
 
 	| account deposit withdraw |
 	
 	account := ReceptiveAccount new.
-	deposit :=  Deposit for: 100 * peso.
-	withdraw := Withdraw for: 50 * peso.
+	deposit :=  Deposit summaryFor: 100 * peso.
+	withdraw := Withdraw summaryFor: 50 * peso.
 		
 	self deny: (account hasRegistered: deposit).
 	self deny: (account hasRegistered: withdraw).
@@ -351,7 +269,7 @@ TestCase subclass: #TransferNetTest
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:21:22'!
+!TransferNetTest methodsFor: 'testing' stamp: 'fran 7/13/2021 22:21:22'!
 test01TransferNetHasBalanceOfZeroInAccountWithoutTransactions
 	|fedeAccount transferNet xxx|
 	fedeAccount _ ReceptiveAccount new.
@@ -361,45 +279,21 @@ test01TransferNetHasBalanceOfZeroInAccountWithoutTransactions
 	
 	self assert: xxx equals: 0 * peso.! !
 
-!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:37:50'!
-test02AccountWithTransferenceHasTheCorrectTransferNet
-	|fedeAccount franAccount transferNetOfFede transferNetOfFran xxx yyy |
+!TransferNetTest methodsFor: 'testing' stamp: 'fran 7/14/2021 23:24:00'!
+test02TransferNetForAccountsWithMultipleTransactions
+	|fedeAccount franAccount transferNetOfFede transferNetOfFran transferNetValueOfFran transferNetValueOfFede |
 	fedeAccount _ ReceptiveAccount new.
 	franAccount _ ReceptiveAccount new.
 	Deposit register: 100 * peso on: fedeAccount.
+	Withdraw register: 50 * peso on: fedeAccount.
 	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
 	transferNetOfFran _ TransferNet of: franAccount.
 	transferNetOfFede _ TransferNet of: fedeAccount.
-	xxx _ transferNetOfFran getTransferNet.
-	yyy _ transferNetOfFede getTransferNet.
+	transferNetValueOfFran _ transferNetOfFran getTransferNet.
+	transferNetValueOfFede _ transferNetOfFede getTransferNet.
 
-	self assert: xxx equals: 50 * peso.
-	self assert: yyy equals: -50 * peso.! !
-
-!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:40:54'!
-test03TransferHasBalanceOfZeroInPortfolioWithoutTransactions
-	"NO HECHO CON TDD"
-	|portfolio transferNetOfPortfolio transferNet|
-	portfolio _ Portfolio new.
-	transferNetOfPortfolio _ TransferNet of: portfolio.
-	transferNet _ transferNetOfPortfolio getTransferNet.
-	
-	self assert: transferNet equals: 0 * peso.! !
-
-!TransferNetTest methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:40:48'!
-test04PortfolioWithTransferenceHasTheCorrectTransferNet
-	"NO HECHO CON TDD"
-	|fedeAccount franAccount portfolio transferNetOfPortfolio transferNet |
-	fedeAccount _ ReceptiveAccount new.
-	franAccount _ ReceptiveAccount new.
-	portfolio _ Portfolio new.
-	portfolio add: fedeAccount.
-	Deposit register: 100 * peso on: fedeAccount.
-	Transfer amount: 50 * peso from: fedeAccount to: franAccount.
-	transferNetOfPortfolio _ TransferNet of: portfolio.
-	transferNet _ transferNetOfPortfolio getTransferNet.
-
-	self assert: transferNet equals: -50 * peso.! !
+	self assert: transferNetValueOfFran equals: 50 * peso.
+	self assert: transferNetValueOfFede equals: -50 * peso.! !
 
 
 !classDefinition: #TransferTest category: 'ServiciosFinancieros-2'!
@@ -659,38 +553,40 @@ Object subclass: #AccountSummary
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/12/2021 20:44:31'!
-depositMessage: aValue
-	summary add: 'Deposito por ', aValue asString.! !
+!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:35:45'!
+messageDeposit: aDepositValue
+	summary add: 'Deposito por ', aDepositValue asString.! !
 
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/12/2021 20:46:19'!
-transferDepositLeg: aValue
-	summary add: 'Entrada por transferencia de ', aValue asString.! !
+!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:37:53'!
+messageTransferDepositLeg: aTransferDepositValue
+	summary add: 'Entrada por transferencia de ', aTransferDepositValue asString.! !
 
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/12/2021 20:46:50'!
-transferWithdrawLeg: aValue
-	summary add: 'Salida por transferencia de ', aValue asString.! !
+!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:38:28'!
+messageTransferWithdrawLeg: aTransferWithdrawValue
+	summary add: 'Salida por transferencia de ', aTransferWithdrawValue asString.! !
 
-!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/12/2021 20:45:18'!
-withdrawMessage: aValue
-	summary add: 'Extraccion por ', aValue asString.! !
+!AccountSummary methodsFor: 'summaryMessages' stamp: 'fran 7/14/2021 22:38:52'!
+messageWithdraw: aWithdrawValue
+	summary add: 'Extraccion por ', aWithdrawValue asString.! !
 
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:52:40'!
-callculateAccountSummary: anOrderedCollection
-	(account transactions) do: [:aTransaction | aTransaction for: self].
-	! !
-
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:43:52'!
-getSummary
-	self callculateAccountSummary: summary.
-	summary add: ('Balance = ', (account balance) asString).
-	^summary.! !
-
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'fran 7/12/2021 20:43:37'!
+!AccountSummary methodsFor: 'initialization' stamp: 'fran 7/12/2021 20:43:37'!
 initializeWith: anAccount
 	account _ anAccount.
 	summary _ OrderedCollection new.! !
+
+
+!AccountSummary methodsFor: 'private' stamp: 'fran 7/14/2021 23:14:21'!
+callculateAccountSummary
+	(account transactions) do: [:aTransaction | aTransaction summaryFor: self].
+	! !
+
+
+!AccountSummary methodsFor: 'main protocol' stamp: 'fran 7/14/2021 23:14:06'!
+getSummary
+	self callculateAccountSummary.
+	summary add: ('Balance = ', (account balance) asString).
+	^summary.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -716,6 +612,16 @@ value
 	self subclassResponsibility ! !
 
 
+!AccountTransaction methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:43:45'!
+transferNetFor: aTransferNet
+	self subclassResponsibility.! !
+
+
+!AccountTransaction methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aSummary
+	self subclassResponsibility.! !
+
+
 !AccountTransaction methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:39'!
 affectBalance: aBalance
 
@@ -727,12 +633,12 @@ affectBalance: aBalance
 AccountTransaction class
 	instanceVariableNames: ''!
 
-!AccountTransaction class methodsFor: 'instance creation' stamp: 'NR 10/21/2019 18:54:27'!
+!AccountTransaction class methodsFor: 'instance creation' stamp: 'fran 7/14/2021 22:43:32'!
 register: aValue on: account
 
 	| transaction |
 	
-	transaction := self for: aValue.
+	transaction := self summaryFor: aValue.
 	account register: transaction.
 		
 	^ transaction! !
@@ -757,9 +663,9 @@ value
 	^ value! !
 
 
-!Deposit methodsFor: 'summary' stamp: 'fran 7/12/2021 20:52:40'!
-for: aSummary
-	aSummary depositMessage: self value.! !
+!Deposit methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aSummary
+	aSummary messageDeposit: self value.! !
 
 
 !Deposit methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:02'!
@@ -768,9 +674,9 @@ affectBalance: aBalance
 	^aBalance + value ! !
 
 
-!Deposit methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:46:05'!
-xxx: aTransferNet
-	aTransferNet depositTransferNetValue: self value.! !
+!Deposit methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:46:06'!
+transferNetFor: aTransferNet
+	aTransferNet valueForDepositTransferNet: self value.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -778,8 +684,8 @@ xxx: aTransferNet
 Deposit class
 	instanceVariableNames: ''!
 
-!Deposit class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:38'!
-for: aValue
+!Deposit class methodsFor: 'instance creation' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aValue
 
 	^ self new initializeFor: aValue ! !
 
@@ -803,8 +709,13 @@ initializeWith: aTransfer
 	transfer := aTransfer! !
 
 
-!TransferLeg methodsFor: 'summary' stamp: 'fran 7/12/2021 20:52:40'!
-for: aSummary
+!TransferLeg methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:43:45'!
+transferNetFor: aTransferNet
+	self subclassResponsibility.! !
+
+
+!TransferLeg methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aSummary
 	self subclassResponsibility.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -837,9 +748,9 @@ withdrawLeg
 	^transfer withdrawLeg! !
 
 
-!TransferDepositLeg methodsFor: 'summary' stamp: 'fran 7/12/2021 20:52:40'!
-for: aSummary
-	aSummary transferDepositLeg: self value.! !
+!TransferDepositLeg methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aSummary
+	aSummary messageTransferDepositLeg: self value.! !
 
 
 !TransferDepositLeg methodsFor: 'balance' stamp: 'LL 9/20/2020 22:27:49'!
@@ -848,9 +759,9 @@ affectBalance: aBalance
 	^aBalance + self value! !
 
 
-!TransferDepositLeg methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:46:48'!
-xxx: aTransferNet
-	aTransferNet transferDepositLegTransferNetValue: self value.! !
+!TransferDepositLeg methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:46:24'!
+transferNetFor: aTransferNet
+	aTransferNet valueForTransferDepositLegTransferNet: self value.! !
 
 
 !classDefinition: #TransferWithdrawLeg category: 'ServiciosFinancieros-2'!
@@ -866,9 +777,9 @@ depositLeg
 	^transfer depositLeg! !
 
 
-!TransferWithdrawLeg methodsFor: 'summary' stamp: 'fran 7/12/2021 20:52:40'!
-for: aSummary
-	aSummary transferWithdrawLeg: self value.! !
+!TransferWithdrawLeg methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aSummary
+	aSummary messageTransferWithdrawLeg: self value.! !
 
 
 !TransferWithdrawLeg methodsFor: 'balance' stamp: 'LL 9/20/2020 22:27:55'!
@@ -877,9 +788,9 @@ affectBalance: aBalance
 	^aBalance - self value! !
 
 
-!TransferWithdrawLeg methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:47:04'!
-xxx: aTransferNet
-	aTransferNet transferWithdrawLegTransferNetValue: self value.! !
+!TransferWithdrawLeg methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:46:50'!
+transferNetFor: aTransferNet
+	aTransferNet valueForTransferWithdrawLegTransferNet: self value.! !
 
 
 !classDefinition: #Withdraw category: 'ServiciosFinancieros-2'!
@@ -901,9 +812,9 @@ value
 	^ value! !
 
 
-!Withdraw methodsFor: 'summary' stamp: 'fran 7/12/2021 20:52:40'!
-for: aSummary
-	aSummary withdrawMessage: self value.! !
+!Withdraw methodsFor: 'summary' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aSummary
+	aSummary messageWithdraw: self value.! !
 
 
 !Withdraw methodsFor: 'balance' stamp: 'HAW 5/25/2019 11:25:15'!
@@ -912,9 +823,9 @@ affectBalance: aBalance
 	^aBalance - value! !
 
 
-!Withdraw methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:46:25'!
-xxx: aTransferNet
-	aTransferNet withdrawTransferNetValue: self value.! !
+!Withdraw methodsFor: 'transferNet' stamp: 'fran 7/14/2021 22:47:08'!
+transferNetFor: aTransferNet
+	aTransferNet valueForWithdrawTransferNet: self value.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -922,8 +833,8 @@ xxx: aTransferNet
 Withdraw class
 	instanceVariableNames: ''!
 
-!Withdraw class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:33'!
-for: aValue
+!Withdraw class methodsFor: 'instance creation' stamp: 'fran 7/14/2021 22:43:32'!
+summaryFor: aValue
 
 	^ self new initializeFor: aValue ! !
 
@@ -1023,41 +934,43 @@ amount: anAmountOfMoney from: originAccount to: destinationAccount
 
 !classDefinition: #TransferNet category: 'ServiciosFinancieros-2'!
 Object subclass: #TransferNet
-	instanceVariableNames: 'account _total'
+	instanceVariableNames: 'account total'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'ServiciosFinancieros-2'!
 
-!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:51:49'!
-callculateTransferNet
-	(account transactions) do: [:aTransaction | aTransaction xxx: self].! !
-
-!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:48:33'!
-getTransferNet
-	self callculateTransferNet.
-	^ _total.! !
-
-!TransferNet methodsFor: 'as yet unclassified' stamp: 'fran 7/13/2021 22:47:43'!
+!TransferNet methodsFor: 'initialization' stamp: 'fran 7/14/2021 23:29:28'!
 initializeWith: anAccount
 	account _ anAccount.
-	_total _ 0 * peso.! !
+	total _ 0 * peso.! !
 
 
-!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:49:24'!
-depositTransferNetValue: aDepositValue
-	_total _ _total + 0.! !
+!TransferNet methodsFor: 'private' stamp: 'fran 7/14/2021 22:43:45'!
+callculateTransferNet
+	(account transactions) do: [:aTransaction | aTransaction transferNetFor: self].! !
 
-!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:51:03'!
-transferDepositLegTransferNetValue: aTransferDepositValue
-	_total _ _total + aTransferDepositValue.! !
 
-!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:51:21'!
-transferWithdrawLegTransferNetValue: aTransferDepositValue
-	_total _ _total - aTransferDepositValue.! !
+!TransferNet methodsFor: 'main protocol' stamp: 'fran 7/14/2021 23:29:28'!
+getTransferNet
+	self callculateTransferNet.
+	^ total.! !
 
-!TransferNet methodsFor: 'transferNetMessages' stamp: 'fran 7/13/2021 22:49:51'!
-withdrawTransferNetValue: aWithdrawValue
-	_total _ _total + 0.! !
+
+!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
+valueForDepositTransferNet: aDepositValue
+	total _ total + 0.! !
+
+!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
+valueForTransferDepositLegTransferNet: aTransferDepositValue
+	total _ total + aTransferDepositValue.! !
+
+!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
+valueForTransferWithdrawLegTransferNet: aTransferDepositValue
+	total _ total - aTransferDepositValue.! !
+
+!TransferNet methodsFor: 'transferNetValues' stamp: 'fran 7/14/2021 23:29:28'!
+valueForWithdrawTransferNet: aWithdrawValue
+	total _ total + 0.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
